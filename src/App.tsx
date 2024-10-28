@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState } from 'react';
+import { fetchUser } from './service';
+import User from './components/User';
 
 /**
  * Goal: Design an application to search github users via their username.
@@ -28,14 +30,68 @@ import React from "react";
  * The favorited users should be displayed in a list, alphabetically sorted by username.
  */
 
+type TypeUser = {
+  avatar_url: string;
+  username: string;
+  name: string;
+  location: string;
+  link: string;
+  bio: string;
+  lastUpdatedAt: string;
+};
+
 const App = () => {
+  const [username, setUsername] = useState('');
+  const [favoriteUsers, setFavoriteUsers] = useState<Array<string>>([]);
+  const [user, setUser] = useState<TypeUser>();
+
+  const handleSearch = async () => {
+    const user = await fetchUser(username);
+    if (user && user.data) {
+      setUser(user.data);
+    }
+  };
+
+  const handleFavorite = (favorite: boolean) => {
+    console.log('favorite', favorite);
+    if (favorite) {
+      setFavoriteUsers([...favoriteUsers, username]);
+    } else {
+      setFavoriteUsers(favoriteUsers.filter((user) => user !== username));
+    }
+  };
+
   return (
-    <div className="container mx-auto px-6">
-      <div className="h-20 flex items-center justify-center bg-gray-200">
-        <h1 className="text-2xl">GitHub Search</h1>
+    <div className='container mx-auto px-6'>
+      <div className='h-20 flex items-center justify-center bg-gray-200'>
+        <h1 className='text-2xl'>GitHub Search</h1>
       </div>
 
-      <div className="mt-6">Add your search form here</div>
+      <div className='mt-6'>
+        <input
+          type='text'
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <button onClick={handleSearch}>Search</button>
+      </div>
+      <div className='mt-6'>
+        {user && (
+          <User
+            avatar={user.avatar_url}
+            favorite={
+              favoriteUsers.filter((user) => user === username).length > 0
+            }
+            onFavorite={handleFavorite}
+            // username={}
+            // name=
+            // location={}
+            // link={}
+            // bio={}
+            // lastUpdatedAt={}
+          />
+        )}
+      </div>
     </div>
   );
 };
